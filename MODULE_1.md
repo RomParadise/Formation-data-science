@@ -28,24 +28,390 @@
 - **Ecosystème** : NumPy, pandas, scikit-learn, PyTorch, TensorFlow… tout est en Python.
 - **Polyvalent** : script, notebook, API, microservice, ML pipeline.
 
-### Concepts à maîtriser absolument
+---
 
-| Concept | Pourquoi c'est crucial |
+## Concept 1 — Fonctions, type hints et docstrings
+
+### Fonction de base
+
+Une fonction prend des données en entrée et retourne un résultat. En data science, on écrit des **fonctions pures** : pas d'effets de bord, même entrée = même sortie.
+
+```python
+def add(a, b):
+    return a + b
+```
+
+### Type hints (annotations de types)
+
+Python est un langage dynamique, mais on peut (et doit) annoter les types pour rendre le code lisible et détectable par les outils.
+
+```python
+def add(a: int, b: int) -> int:
+    return a + b
+
+def greet(name: str) -> str:
+    return f"Bonjour {name}"
+
+# Avec des types complexes
+def mean(values: list[float]) -> float:
+    return sum(values) / len(values)
+
+# Valeur optionnelle (peut être None)
+def find(items: list[str], target: str) -> str | None:
+    for item in items:
+        if item == target:
+            return item
+    return None
+```
+
+### Docstrings
+
+La docstring documente ce que fait la fonction. Elle s'écrit juste après `def`, entre triple guillemets :
+
+```python
+def word_count(text: str) -> dict[str, int]:
+    """Return word frequencies sorted by descending count.
+
+    Args:
+        text: Input text to analyze.
+
+    Returns:
+        Dict mapping each lowercase word to its frequency.
+    """
+    # ton code ici
+```
+
+---
+
+## Concept 2 — Structures de données natives
+
+### dict (dictionnaire)
+
+Un dictionnaire associe des **clés** à des **valeurs**. C'est la structure la plus utilisée en data.
+
+```python
+# Créer
+scores = {"Alice": 95, "Bob": 87, "Charlie": 92}
+
+# Lire
+print(scores["Alice"])    # 95
+print(scores.get("Zoe", 0))  # 0 (valeur par défaut si clé absente)
+
+# Ajouter / modifier
+scores["Zoe"] = 78
+
+# Itérer
+for name, score in scores.items():
+    print(f"{name} : {score}")
+
+# Trier par valeur décroissante
+sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+# → {"Alice": 95, "Charlie": 92, "Bob": 87, "Zoe": 78}
+```
+
+### list comprehension
+
+Au lieu d'écrire une boucle for + append, on peut créer une liste en une ligne :
+
+```python
+# Boucle classique
+numbers = []
+for x in range(10):
+    numbers.append(x * 2)
+
+# Équivalent en comprehension (préféré)
+numbers = [x * 2 for x in range(10)]
+
+# Avec condition
+evens = [x for x in range(20) if x % 2 == 0]
+```
+
+---
+
+## Concept 3 — Gestion d'erreurs (try/except)
+
+En production, les données peuvent être sales, les fichiers absents, les valeurs invalides. On doit gérer ça proprement.
+
+```python
+# Lever une erreur
+def divide(a: float, b: float) -> float:
+    if b == 0:
+        raise ValueError("Le diviseur ne peut pas être zéro")
+    return a / b
+
+# Attraper une erreur
+try:
+    result = divide(10, 0)
+except ValueError as e:
+    print(f"Erreur : {e}")
+
+# Plusieurs types d'erreurs
+try:
+    f = open("data.csv")
+except FileNotFoundError:
+    print("Fichier introuvable")
+except PermissionError:
+    print("Pas les droits pour lire ce fichier")
+```
+
+Les types d'erreurs courants :
+| Exception | Quand |
 |---|---|
-| **Types & structures** (list, dict, set, tuple) | 80% de ton code en data = manipuler des collections |
-| **Comprehensions** (`[x*2 for x in xs]`) | Code plus court, plus rapide qu'une boucle |
-| **Fonctions pures + type hints** | Code testable, auto-documenté |
-| **Classes** | Encapsuler logique métier (modèles, pipelines) |
-| **Gestion d'erreurs** | Un job batch qui plante à 3h du matin sans message clair = catastrophe |
-| **Modules & imports** | Organiser un projet > 100 lignes |
-| **Tests unitaires** | Garantir que ton code marche après chaque modification |
-| **Linting (ruff) + PEP8** | Code lisible par toute l'équipe |
+| `ValueError` | Valeur invalide (ex: nombre négatif) |
+| `KeyError` | Clé absente dans un dict |
+| `FileNotFoundError` | Fichier inexistant |
+| `TypeError` | Mauvais type passé à une fonction |
+| `ZeroDivisionError` | Division par zéro |
 
-### Lectures conseillées (optionnelles mais utiles)
+---
 
-- *Automate the Boring Stuff with Python* (gratuit en ligne).
-- PEP 8 : https://peps.python.org/pep-0008/
-- Documentation `typing` : https://docs.python.org/3/library/typing.html
+## Concept 4 — Expressions régulières (regex) — pour l'Exercice 1
+
+### C'est quoi ?
+
+Une regex est un **motif de texte** qui permet de rechercher, extraire ou remplacer des parties d'une chaîne. Le module Python s'appelle `re`.
+
+### Les patterns de base
+
+| Pattern | Signification | Exemple |
+|---|---|---|
+| `\w` | Un caractère mot (lettre, chiffre, `_`) | `a`, `Z`, `3` |
+| `\W` | Tout ce qui n'est PAS un caractère mot | `,`, `!`, ` ` |
+| `\s` | Espace blanc (espace, tabulation, saut de ligne) | ` `, `\t` |
+| `[abc]` | Un caractère parmi a, b ou c | `a` ou `b` ou `c` |
+| `[^abc]` | Tout sauf a, b, c | `z`, `1` |
+| `+` | Un ou plusieurs du caractère précédent | `\w+` = un mot entier |
+| `*` | Zéro ou plusieurs | |
+
+### Utilisation pratique
+
+```python
+import re
+
+text = "Bonjour, monde! Hello world."
+
+# Trouver tous les mots (séquences de caractères word)
+words = re.findall(r"\w+", text)
+# → ["Bonjour", "monde", "Hello", "world"]
+
+# Remplacer la ponctuation par rien
+clean = re.sub(r"[^\w\s]", "", text)
+# → "Bonjour monde Hello world"
+
+# Remplacer la ponctuation par un espace
+clean2 = re.sub(r"[,\.!?;:]", " ", text)
+# → "Bonjour  monde  Hello world "
+```
+
+### La méthode la plus simple pour les mots
+
+```python
+import re
+
+def get_words(text: str) -> list[str]:
+    """Extrait tous les mots d'un texte, en minuscules."""
+    return re.findall(r"\w+", text.lower())
+
+print(get_words("Hello, World! Hello."))
+# → ["hello", "world", "hello"]
+```
+
+### Compter avec un dict
+
+```python
+words = ["hello", "world", "hello", "hello"]
+
+counts = {}
+for word in words:
+    if word in counts:
+        counts[word] += 1
+    else:
+        counts[word] = 0 + 1
+
+# Façon plus courte avec .get()
+counts = {}
+for word in words:
+    counts[word] = counts.get(word, 0) + 1
+
+# → {"hello": 3, "world": 1}
+```
+
+Tu as maintenant tous les outils pour faire l'Exercice 1.
+
+---
+
+## Concept 5 — Classes et programmation orientée objet — pour l'Exercice 2
+
+### Pourquoi les classes ?
+
+Une classe regroupe des **données** (attributs) et des **comportements** (méthodes) dans un seul objet. En data science on en a besoin pour modéliser des entités : un utilisateur, une transaction, un modèle ML.
+
+### Anatomie d'une classe
+
+```python
+class Dog:
+    # __init__ est le constructeur : appelé quand on crée un objet
+    def __init__(self, name: str, age: int):
+        self.name = name    # attribut d'instance
+        self.age = age
+
+    # méthode : fonction liée à l'objet
+    def bark(self) -> str:
+        return f"{self.name} dit : Woof!"
+
+    def is_puppy(self) -> bool:
+        return self.age < 2
+
+
+# Créer un objet (instance)
+rex = Dog("Rex", 3)
+luna = Dog("Luna", 1)
+
+print(rex.bark())       # "Rex dit : Woof!"
+print(luna.is_puppy())  # True
+print(rex.name)         # "Rex"
+```
+
+**`self`** : représente l'instance elle-même. Toujours premier paramètre des méthodes.
+
+### Classe avec historique
+
+```python
+class ShoppingCart:
+    def __init__(self, owner: str):
+        self.owner = owner
+        self.items: list[dict] = []   # liste vide au départ
+        self.total: float = 0.0
+
+    def add_item(self, name: str, price: float) -> None:
+        if price <= 0:
+            raise ValueError(f"Prix invalide : {price}")
+        self.items.append({"name": name, "price": price})
+        self.total += price
+
+    def remove_last(self) -> None:
+        if not self.items:
+            raise ValueError("Le panier est vide")
+        item = self.items.pop()         # retire le dernier élément
+        self.total -= item["price"]
+
+    def summary(self) -> str:
+        return f"{self.owner} : {len(self.items)} article(s), total = {self.total:.2f}€"
+
+
+# Utilisation
+cart = ShoppingCart("Alice")
+cart.add_item("MacBook", 899.0)
+cart.add_item("Souris", 29.0)
+print(cart.summary())  # "Alice : 2 article(s), total = 928.00€"
+```
+
+Tu vois le principe ? `BankAccount` sera très similaire à `ShoppingCart`.
+
+---
+
+## Concept 6 — Module `csv` — pour l'Exercice 3
+
+Python a un module natif `csv` pour lire des fichiers CSV sans pandas.
+
+```python
+import csv
+
+# Lire un fichier CSV
+with open("data.csv", newline="") as f:
+    reader = csv.DictReader(f)   # chaque ligne devient un dict
+    for row in reader:
+        print(row)
+        # → {"date": "2026-01-15", "product": "MacBook Pro", "price": "899.00"}
+```
+
+`DictReader` utilise la première ligne comme noms de colonnes. Les valeurs sont toutes des **chaînes de caractères** — il faut convertir en float pour faire des calculs :
+
+```python
+price = float(row["price"])   # "899.00" → 899.0
+```
+
+---
+
+## Concept 7 — Tests unitaires avec pytest
+
+### Pourquoi tester ?
+
+Un test vérifie automatiquement qu'une fonction fait ce qu'on attend. Quand tu modifies du code, les tests te disent immédiatement si tu as cassé quelque chose.
+
+### Structure d'un test
+
+```python
+# fichier test_xxx.py
+
+def test_nom_descriptif():
+    # 1. Prépare les données
+    texte = "bonjour monde"
+
+    # 2. Appelle la fonction
+    resultat = word_count(texte)
+
+    # 3. Vérifie le résultat
+    assert resultat == {"bonjour": 1, "monde": 1}
+```
+
+`assert` vérifie que l'expression est vraie. Si ce n'est pas le cas, le test échoue avec un message clair.
+
+### Tester qu'une erreur est bien levée
+
+```python
+import pytest
+
+def test_valeur_negative_leve_erreur():
+    with pytest.raises(ValueError):
+        ma_fonction(-1)    # doit lever ValueError
+```
+
+### Lancer les tests
+
+```bash
+# Tous les tests d'un fichier
+uv run pytest module1/tests/test_word_count.py -v
+
+# Tous les tests du module
+uv run pytest module1/ -v
+
+# Le -v (verbose) affiche chaque test avec son statut
+```
+
+---
+
+## Concept 8 — PEP8 et ruff
+
+PEP8 = les conventions de style Python. `ruff` les vérifie automatiquement.
+
+Les règles les plus importantes :
+```python
+# ❌ Mauvais
+def f(l,x):
+    if x==None:
+        return 0
+    return l[0]+x
+
+# ✅ Bon
+def compute(values: list[float], extra: float | None) -> float:
+    if extra is None:
+        return 0.0
+    return values[0] + extra
+```
+
+Règles clés :
+- Espaces autour des opérateurs : `a + b` pas `a+b`
+- Pas d'espace avant `:` dans les defs : `def f(a, b):` pas `def f( a,b ) :`
+- `is None` / `is not None` (jamais `== None`)
+- Noms explicites : `word_count` pas `wc` ou `f`
+- 2 lignes vides entre les fonctions
+
+Vérifier ton fichier :
+```bash
+uv run ruff check module1/word_count.py
+# Si rien ne s'affiche = pas d'erreur ✓
+```
 
 ---
 
