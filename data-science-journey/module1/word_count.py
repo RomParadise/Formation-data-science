@@ -1,9 +1,17 @@
 """Word frequency counter."""
-
+import re
 
 def word_count(text: str) -> dict[str, int]:
+    """Return word frequencies sorted by descending count.
+
+    Args:
+        text: Input text to analyze.
+
+    Returns:
+        Dict mapping each lowercase word to its frequency.
+    """
     txt = text.lower()
-    words = txt.split()
+    words = re.findall(r"\w+", txt)
     word_freq = {}
     for word in words:
         if word in word_freq:
