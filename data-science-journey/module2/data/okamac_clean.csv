@@ -1,0 +1,12 @@
+id,modele,annee,prix,etat
+1,Macbook Air,2020,599.0,bon
+2,Macbook Pro,2021,899.0,très bon
+3,Imac 21,2019,749.0,correct
+4,,2022,,neuf
+5,Macbook Air,2020,550.0,bon
+6,Macbook Pro,2021,950.0,très bon
+7,Imac 27,2018,1299.0,bon
+8,Macbook Air,2020,574.5,correct
+9,Macbook Pro,2021,920.0,très bon
+10,Imac 21,2019,740.0,inconnu
+11,Macbook Pro,2021,,très bon
